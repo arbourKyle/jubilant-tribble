@@ -51,8 +51,8 @@ Quantifiers:
 *       - 0 or More
 +       - 1 or More
 ?       - 0 or One
-{3}     - Exact Number
-{3,4}   - Range of Numbers (Minimum, Maximum)
+{0}     - Exact Number
+{0,10}   - Range of Numbers (Minimum, Maximum)
 
 
 ### Anchors
@@ -74,7 +74,7 @@ First we declare a variable of a string we want to test against a regular expres
 
 In a console log is our test case, which is wrapped in forward slashes to identify it as a regex literal, telling the regex engine to look at what is written between the slashes.
 
-The first character of our test is the CARET ANCHOR, anchoring the beginning of our expression. 
+The first token of our test is the CARET ANCHOR, anchoring the beginning of our expression. 
 
 Next is the letter J, followed by .test(str), which is the regex test function testing the parameter in the parentheses, in this case a variable.
 
@@ -85,7 +85,7 @@ If we were to remove the caret and put the dollar sign after the J we would be a
 
 ### Quantifiers
 
-Quantifiers match a number of instances of a character, group, or character class in a string. A number in curly braces {n}is the simplest quantifier. When you append it to a character or character class, it specifies how many characters or character classes you want to match.
+Quantifiers match a number of instances of a character, group, or character class in a string. A number in curly braces {n} is the simplest quantifier. When you append it to a character or character class, it specifies how many characters or character classes you want to match.
 
 For example, the regular expression /\d{4}/ matches a four-digit number. It is the same as /\d\d\d\d/:
 
@@ -104,9 +104,9 @@ This .match() function is checking for 4 digits in the variable str and returns 
 
 ### Grouping Constructs
 
-Groupings consist of sets and ranges. The square brackets search for any character in a set. For example, [aeiou] matches any of the five characters: 'a', 'e', 'i', 'o' and 'u'. The [...] is called a set.
+Groupings consist of Sets and Ranges. The square brackets search for any character in a set. For example, [aeiou] matches any of the five characters: 'a', 'e', 'i', 'o' and 'u'. The [...] is called a set.
 
-For example, the regular expression /[cbr]ats/g matches cats, bats, and rats:
+For example, the regular expression /[cbr]ats/g matches cats, bats, and rats. The g at the end is a flag, meaning to search for all matches, without this flag the expressions would only return the first match, 'cats'. In a later section flags will be covered in more detail.
 
 	let str = 'How cats, rats, and bats became Halloween animals';
 	let re = /[cbr]ats/g;
@@ -123,16 +123,127 @@ The square brackets can contain character ranges. For example, [a-z] is a charac
 The [a-zA-Z0-9_] is the same as \w. The [0-9] is the same as \d. As referenced above in components.
 
 
-
 ### Bracket Expressions
+
+A bracket expression is a list of characters enclosed by [ and ]. It matches any SINGLE CHARACTER in that list. If the first character of the list is the CARET ANCHOR, then it matches any character NOT in the list, and it is unspecified whether it matches an encoding error.
+
+For example, the regular expression [0123456789] matches any single digit, whereas [^()] matches any single character that is not an opening or closing parenthesis, and might or might not match an encoding error.
+
+Within a bracket expression, a range expression consists of two characters separated by a hyphen. It matches any single character that sorts between the two characters, inclusively.
+
+For example, [a-d] is equivalent to [abcd].
 
 ### Character Classes
 
+Certain named classes of characters are predefined within bracket expressions, to use them they are placed within another set of brackets.
+
+[:alnum:]
+Alphanumeric characters: [:alpha:] and [:digit:] - this is the same as [0-9A-Za-z].
+
+[:alpha:]
+Alphabetic characters: [:lower:] and [:upper:] - this is the same as [A-Za-z].
+
+[:blank:]
+Blank characters: space and tab.
+
+[:cntrl:]
+Control characters. In ASCII, these characters have octal codes 000 through 037, and 177 (DEL). In other character sets, these are the equivalent characters, if any.
+
+[:digit:]
+Digits: 0 1 2 3 4 5 6 7 8 9.
+
+[:graph:]
+Graphical characters: [:alnum:] and [:punct:].
+
+[:lower:]
+Lower-case letters: a b c d e f g h i j k l m n o p q r s t u v w x y z.
+
+[:print:]
+Printable characters: [:alnum:], [:punct:], and space.
+
+[:punct:]
+Punctuation characters: ! " # $ % & ' ( ) * + , - . / : ; < = > ? @ [ \ ] ^ _ ` { | } ~.
+
+[:space:]
+Space characters: tab, newline, vertical tab, form feed, carriage return, and space.
+
+[:upper:]
+Upper-case letters: A B C D E F G H I J K L M N O P Q R S T U V W X Y Z.
+
+[:xdigit:]
+Hexadecimal digits: 0 1 2 3 4 5 6 7 8 9 A B C D E F a b c d e f.
+
+Note that the brackets in these class names are part of the symbolic names, and must be included in addition to the brackets delimiting the bracket expression.
+
+If you mistakenly omit the outer brackets, and search for say, [:upper:], you will get an error.
+
+
 ### The OR Operator
+
+The OR Operator in regex is the pipe symbol you are probably familiar with. And you can use it the same way, but a more in-depth understanding of the regex engine and it's process is needed to use it intelligently, or you may run into problems.
+
+If you want to search for the literal text cat or dog, separate both options with a vertical bar or pipe symbol: cat|dog. If you want more options, simply expand the list: cat|dog|mouse|fish.
+
+The alternation operator has the lowest precedence of all regex operators. That is, it tells the regex engine to match either everything to the left of the vertical bar, or everything to the right of the vertical bar. If you want to limit the reach of the alternation, you need to use parentheses for grouping. If we want to improve the first example to match whole words only, we would need to use \b(cat|dog)\b. This tells the regex engine to find a word boundary, then either cat or dog, and then another word boundary. If we had omitted the parentheses then the regex engine would have searched for a word boundary followed by cat, or, dog followed by a word boundary.
+
+Another example:
+
+^I like (dogs|penguins), but not (lions|tigers).$
+This expression will match any of the following strings:
+
+I like dogs, but not lions.
+I like dogs, but not tigers.
+I like penguins, but not lions.
+I like penguins, but not tigers.
+However, there is an unintended side-effect of our grouping and alternation, as written above. This pattern will match any combination of the terms we’ve supplied, as expected, but it will also store those matches into match groups for later inspection.
+
+If you don’t want your grouping and alternation to interfere with other numbered groups in your expression, each “or” group must be prefixed with ?: – like so:
+
+^I like (?:dogs|penguins), but not (?:lions|tigers).$
 
 ### Flags
 
+Regular expressions may have flags that affect the search.
+
+There are only 6 of them in JavaScript:
+
+i
+With this flag the search is case-insensitive: no difference between A and a.
+
+g
+With this flag the search looks for all matches, without it – only the first match is returned.
+
+m
+Multiline mode , enable an expression to be written over multiple lines for clarity.
+
+s
+Enables “dotall” mode, that allows a dot . to match newline character \n.
+
+u
+Enables full Unicode support. The flag enables correct processing of surrogate pairs.
+
+y
+“Sticky” mode: searching at the exact position in the text.
+
+
 ### Character Escapes
+
+Consider these meta characters:
+
+	. [ { ( ) \ ^ $ | ? * + } ]
+
+Each of these have a specific meaning and use in a regular expression, if you want to use the decimal as a decimal or a period, rather than it's designated regex function, it needs to be ESCAPED with a backslash in front of it.
+
+You are probably familiar with wildcard notations such as the * to select all of soemthing in a file or search for all of something.
+
+The regular expression to find all text files is ^.*\.txt$
+
+Notice how the .text has a backslash before it so that the dot would be a literal dot. The backslash itself is not part of the regular expression and is not included in the search.
+
+Referencing the components above, we can explain this expressions as follows:
+
+Caret anchor, dot is any character, the first character can be anything. The * says any numbers of characters following the first, then .text, with the & anchoring the end saying anything thats ends with letter t.
+
 
 ## Author
 
