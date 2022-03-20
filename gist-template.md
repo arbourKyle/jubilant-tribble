@@ -20,6 +20,10 @@ A regular expression is a pattern that describes a set of strings.
 - [The OR Operator](#the-or-operator)
 - [Flags](#flags)
 - [Character Escapes](#character-escapes)
+- [Matching a Hex Value](#matching-a-hex-value)
+- [Matching an Email](#matching-an-email)
+- [Matching a URL](#matching-a-URL)
+- [Matching an HTML Tag](#matching-an-HTML-tag)
 
 ## Regex Components
 
@@ -245,6 +249,34 @@ Referencing the components above, we can explain this expressions as follows:
 Caret anchor, dot is any character, the first character can be anything. The * says any numbers of characters following the first, then .text, with the & anchoring the end saying anything thats ends with letter t.
 
 
+### Matching a Hex Value
+
+	/^#?([a-f0-9]{6}|[a-f0-9]{3})$/
+
+The first token is the CARET ANCHOR, and then a number sign which is optional because it is followed by a question mark. The question mark tells the parser that the preceding character — in this case a number sign — is optional, but to be "greedy" and capture it if it's there.
+Next, inside the first group of parentheses we have an OR OPERATOR in the centre.
+The first group in SQUARE BRACKETS matches any alpha or digit, and in CURLY BRACES we have a QUANTIFIER denoting 6 characters.
+After the PIPE/OR OPERATOR, we have the same expression with 3 characters instead of 6. Finally, we end the string with a DOLLAR ANCHOR($).
+
+### Matching An Email
+
+	/^([a-z0-9_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})$/
+
+The first token is the CARET ANCHOR. Inside the first group of PARENTHESES, we match one or more alpha, digit, underscore, dot, or hyphen. The dot is escaped to be used in the search. Between the end of SQUARE BRACKETS grouping and the end of expression PARENTHESES we put the + sign to denote the match to be one time. And after the first group is the @ sign.
+Next is the domain name, repeating the previous expression for any alpha, digit, underscore, dot, or hyphen; with another escaped dot. After which is a QUANTIFIER denoting two to six letters or dots. This number can be set to any length of domain name that you prefer. Finally, ending the expressing with the DOLLAR ANCHOR ($).
+
+### Matching a URL
+
+	/^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/
+	
+After the CARET ANCHOR, the first capturing group between PARENTHESES allows the URL to begin with "http://", "https://", or neither of them, with the question mark after the s to allow URL's that have http or https. The two slashes that follow the http must be escape so that they do not represent another regex expression. Another question mark at the end allows the http to be optional.
+
+Next is the domain name: an expression group that must be familiar by now, searching for alphas, digits, dots, and hyphens. Between that expression group in PARENTHESES and the next is an escaped dot to ensure delimiting between the domain name and the folowing optional files and directories.
+Inside the last two PARENTHESES groups, we want to match any number of forward slashes, letters, numbers, underscores, spaces, dots, or hyphens with a QUANTIFIER. This allows multiple directories to be matched along with a file at the end. The stars are used instead of the question mark because the star matches zero or more, not zero or one. If a question mark was to be used there, only one file/directory would be able to be matched.
+
+Then a trailing slash is matched, but it can be optional. Finally we end with the DOLLAR ANCHOR($).
+
+
 ## Author
 
-A short section about the author with a link to the author's GitHub profile (replace with your information and a link to your profile)
+https://github.com/arbourKyle
